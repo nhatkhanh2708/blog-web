@@ -2,7 +2,7 @@ package com.springk.blog.restcontrollers.api.v1;
 
 import com.springk.blog.dtos.UserDto;
 import com.springk.blog.dtos.response.ResponseDto;
-import com.springk.blog.dtos.response.ResponseFailed;
+import com.springk.blog.dtos.response.ResponseSimple;
 import com.springk.blog.services.interfaces.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class UserRestController {
     private IUserService _userService;
 
     @GetMapping("")
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<?> getsAll(){
         log.info("Gets all account");
         return ResponseEntity.ok(
                 new ResponseDto(
@@ -34,48 +34,52 @@ public class UserRestController {
     public ResponseEntity<?> getById(@PathVariable long id){
         log.info("Get a account with id = " + id);
         UserDto user = _userService.findById(id);
-        return user != null ?
-                ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get account successed", user))
-                : new ResponseEntity<>(
-                        new ResponseFailed(HttpStatus.NOT_FOUND.value(), "Not found account"), HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a account successed", user));
     }
 
     @GetMapping("/param")
     public ResponseEntity<?> getByEmail(
             @RequestParam(name = "email", required = true) String email){
         log.info("Get a account with email = " + email);
-        if(email == null || email.isEmpty()){
-            return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Email is not blank !"));
-        }
         UserDto user = _userService.findByEmail(email);
-        return user != null ?
-                ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get account successed", user))
-                : new ResponseEntity<>(
-                new ResponseFailed(HttpStatus.NOT_FOUND.value(), "Not found account"), HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a account successed", user));
     }
 
-    @GetMapping("/getby")
+    @GetMapping("/username/{username}")
     public ResponseEntity<?> getByUsername(
-            @RequestParam(name = "username", required = true) String username){
+            @PathVariable(name = "username", required = true) String username){
         log.info("Get a account with username = " + username);
-        if(username == null || username.isEmpty()){
-            return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Username is not blank !"));
-        }
-
         return ResponseEntity.ok(
                 new ResponseDto(
                         HttpStatus.OK.value(),
-                        "Get user successed",
+                        "Get a user successed",
                         _userService.findByUsername(username)));
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> addUser(@Valid @RequestBody UserDto userDto){
-        log.info("Add new user");
+    @PutMapping("/{username}/update")
+    public ResponseEntity<?> updateInfoUser(
+            @PathVariable(name = "username", required = true) String username,
+            @Valid @RequestBody UserDto userDto){
+        log.info("Update user with username = "+username);
         return ResponseEntity.ok(
                 new ResponseDto(
                         HttpStatus.OK.value(),
-                        "Add new user successed",
-                        _userService.add(userDto)));
+                        "Updated the user successed",
+                        _userService.updateInfo(userDto)
+                )
+        );
     }
+
+    @PutMapping("/{username}/block")
+    public ResponseEntity<?> blockUser(
+            @PathVariable(name = "username", required = true) String username){
+
+        log.info("Block user : "+username);
+        _userService.blockUser(username);
+        return ResponseEntity.ok().body(new ResponseSimple(
+                HttpStatus.OK.value(),
+                "Blocked the user successed"
+        ));
+    }
+
 }

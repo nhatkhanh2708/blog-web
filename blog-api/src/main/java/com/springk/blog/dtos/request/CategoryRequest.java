@@ -10,10 +10,8 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
-    @NotBlank(message = "Username is not blank !")
-    @Size(max = 70)
-    private String username;
-    @NotBlank(message = "Password is not blank !")
-    private String password;
+public class CategoryRequest {
+    @Size(max = 200)
+    @NotBlank
+    private String title;
 }

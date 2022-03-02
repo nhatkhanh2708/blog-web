@@ -3,6 +3,9 @@ package com.springk.blog.services.impls;
 import com.springk.blog.dal.entities.Role;
 import com.springk.blog.dal.repositories.RoleRepository;
 import com.springk.blog.dtos.RoleDto;
+import com.springk.blog.dtos.request.RoleRequest;
+import com.springk.blog.exceptions.ConflictException;
+import com.springk.blog.exceptions.ObjectNotFoundException;
 import com.springk.blog.services.interfaces.IRoleService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -33,20 +36,26 @@ public class RoleService implements IRoleService {
     @Override
     @Transactional
     public RoleDto findById(long id) {
-        Role role = _roleRepository.findById(id).orElse(null);
-        return role != null ? _mapper.map(role, RoleDto.class) : null;
-    }
-
-    @Override
-    public RoleDto findByName(String name) {
-        Role role = _roleRepository.findByName(name).orElse(null);
-        return role != null ? _mapper.map(role, RoleDto.class) : null;
+        Role role = _roleRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Role isn't found with id = "+id));
+        return _mapper.map(role, RoleDto.class);
     }
 
     @Override
     @Transactional
-    public RoleDto add(RoleDto roledto) {
-        Role role = _mapper.map(roledto, Role.class);
+    public RoleDto findByName(String name) {
+        Role role = _roleRepository.findByName(name)
+                .orElseThrow(() -> new ObjectNotFoundException("Role isn't found with name = "+name));
+        return _mapper.map(role, RoleDto.class);
+    }
+
+    @Override
+    @Transactional
+    public RoleDto add(RoleRequest roleRequest) {
+        if(_roleRepository.findByName(roleRequest.getName()).isPresent()){
+            throw new ConflictException("This name role was exist !");
+        }
+        Role role = _mapper.map(roleRequest, Role.class);
         return _mapper.map(_roleRepository.save(role), RoleDto.class);
     }
 }
