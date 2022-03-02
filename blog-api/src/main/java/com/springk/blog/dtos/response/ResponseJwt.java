@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class ResponseJwt {
-    private String tokenType = "Bearer";
+    private final String tokenType = "Bearer";
     private String token;
     private long id;
     private String username;

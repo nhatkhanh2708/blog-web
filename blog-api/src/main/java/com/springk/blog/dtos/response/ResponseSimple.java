@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResponseFailed {
+@AllArgsConstructor
+public class ResponseSimple {
     private int status;
     private String message;
 }

@@ -1,17 +1,18 @@
 package com.springk.blog.dtos.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.springk.blog.dtos.RoleDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 import java.util.Set;
 
 @Data
-public class SignupRequest implements Serializable {
+@AllArgsConstructor
+@NoArgsConstructor
+public class SignupRequest {
     @Size(max = 70)
     @NotBlank(message = "Input username")
     private String username;

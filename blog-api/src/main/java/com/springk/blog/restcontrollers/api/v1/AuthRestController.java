@@ -1,21 +1,12 @@
 package com.springk.blog.restcontrollers.api.v1;
 
-import com.springk.blog.dal.repositories.RoleRepository;
-import com.springk.blog.dal.repositories.UserRepository;
-import com.springk.blog.dtos.RoleDto;
-import com.springk.blog.dtos.UserDto;
 import com.springk.blog.dtos.request.LoginRequest;
 import com.springk.blog.dtos.request.SignupRequest;
 import com.springk.blog.dtos.response.ResponseDto;
-import com.springk.blog.dtos.response.ResponseFailed;
 import com.springk.blog.dtos.response.ResponseJwt;
 import com.springk.blog.security.jwt.JwtUtils;
 import com.springk.blog.security.jwt.UserDetailsImpl;
-import com.springk.blog.services.impls.RoleService;
-import com.springk.blog.services.impls.UserService;
-import com.springk.blog.services.interfaces.IRoleService;
 import com.springk.blog.services.interfaces.IUserService;
-import com.springk.blog.utils.enums.EnumRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,15 +15,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,12 +35,6 @@ public class AuthRestController {
 
     @Autowired
     private IUserService _userService;
-
-    @Autowired
-    private IRoleService _roleService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> getLogin(@Valid @RequestBody LoginRequest login) {
@@ -76,41 +58,11 @@ public class AuthRestController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(@Valid @RequestBody SignupRequest signupRequest) {
-        if (_userService.findByUsername(signupRequest.getUsername()) != null) {
-            return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Error: Username is already taken!"));
-        }
-
-        if (_userService.findByEmail(signupRequest.getEmail()) != null) {
-            return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Error: Email is already in use!"));
-        }
-
         log.info("Creating a new user");
-        UserDto userDto = new UserDto();
-        userDto.setUsername(signupRequest.getUsername());
-        userDto.setEmail(signupRequest.getEmail());
-        userDto.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        userDto.setActive(true);
-
-        Set<String> strRoles = signupRequest.getRoles();
-        Set<RoleDto> rolesdto = new HashSet<>();
-
-        if (strRoles == null || strRoles.size() == 0) {
-            RoleDto roledto = _roleService.findByName(EnumRole.USER.name());
-            rolesdto.add(roledto);
-        } else {
-            strRoles.forEach(role -> {
-                        RoleDto roledto = _roleService.findByName(role);
-                        if(roledto != null)
-                            rolesdto.add(roledto);
-                    }
-            );
-            if(rolesdto.size() == 0){
-                return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Need add role for user"));
-            }
-        }
-
-        userDto.setRoles(rolesdto);
-        log.info("Created a new user successed");
-        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Created user successed", _userService.add(userDto)));
+        return ResponseEntity.ok(
+                new ResponseDto(
+                        HttpStatus.OK.value(),
+                        "Created user successed",
+                        _userService.add(signupRequest)));
     }
 }

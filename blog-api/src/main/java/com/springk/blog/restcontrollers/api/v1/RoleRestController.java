@@ -1,8 +1,8 @@
 package com.springk.blog.restcontrollers.api.v1;
 
 import com.springk.blog.dtos.RoleDto;
+import com.springk.blog.dtos.request.RoleRequest;
 import com.springk.blog.dtos.response.ResponseDto;
-import com.springk.blog.dtos.response.ResponseFailed;
 import com.springk.blog.services.interfaces.IRoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +23,11 @@ public class RoleRestController {
     public ResponseEntity<?> getById(@PathVariable long id){
         log.info("Get a role with id = "+id);
         RoleDto role = _roleService.findById(id);
-        return role != null ?
-                ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get role successed", role))
-                : new ResponseEntity<>(
-                new ResponseFailed(HttpStatus.NOT_FOUND.value(), "Not found the role with this id"), HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a role successed", role));
     }
 
-    @GetMapping(value = {"", "/"})
-    public ResponseEntity<?> getAll(){
+    @GetMapping(value = {""})
+    public ResponseEntity<?> getsAll(){
         log.info("Gets all role");
         return ResponseEntity.ok(
                 new ResponseDto(
@@ -39,10 +36,18 @@ public class RoleRestController {
                         _roleService.findAll()));
     }
 
+    @GetMapping("/param")
+    public ResponseEntity<?> getByName(@RequestParam(name = "name") String name){
+        log.info("Get a role with name = "+name);
+        RoleDto role = _roleService.findByName(name);
+        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a role successed", role));
+    }
+
     @PostMapping("")
-    public ResponseEntity<?> addRole(@Valid @RequestBody RoleDto roledto){
-        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(),
+    public ResponseEntity<?> addNewRole(@Valid @RequestBody RoleRequest roleRequest){
+        return ResponseEntity.ok(
+                new ResponseDto(HttpStatus.OK.value(),
                 "Add role successed",
-                _roleService.add(roledto)));
+                _roleService.add(roleRequest)));
     }
 }
