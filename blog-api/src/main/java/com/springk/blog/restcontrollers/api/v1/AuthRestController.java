@@ -15,6 +15,7 @@ import com.springk.blog.services.impls.RoleService;
 import com.springk.blog.services.impls.UserService;
 import com.springk.blog.services.interfaces.IRoleService;
 import com.springk.blog.services.interfaces.IUserService;
+import com.springk.blog.utils.enums.EnumRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,7 @@ public class AuthRestController {
 
         String jwt = jwtUtils.generateToken(userDetails);
 
+        log.info("Generated jwt for user successed");
         return ResponseEntity.ok(new ResponseJwt(
                 jwt,
                 userDetails.getId(),
@@ -74,14 +76,15 @@ public class AuthRestController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(@Valid @RequestBody SignupRequest signupRequest) {
-        if (_userService.findByUsername(signupRequest.getUsername()) == null) {
+        if (_userService.findByUsername(signupRequest.getUsername()) != null) {
             return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Error: Username is already taken!"));
         }
 
-        if (_userService.findByEmail(signupRequest.getEmail()) == null) {
+        if (_userService.findByEmail(signupRequest.getEmail()) != null) {
             return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Error: Email is already in use!"));
         }
 
+        log.info("Creating a new user");
         UserDto userDto = new UserDto();
         userDto.setUsername(signupRequest.getUsername());
         userDto.setEmail(signupRequest.getEmail());
@@ -92,7 +95,7 @@ public class AuthRestController {
         Set<RoleDto> rolesdto = new HashSet<>();
 
         if (strRoles == null || strRoles.size() == 0) {
-            RoleDto roledto = _roleService.findByName("USER");
+            RoleDto roledto = _roleService.findByName(EnumRole.USER.name());
             rolesdto.add(roledto);
         } else {
             strRoles.forEach(role -> {
@@ -101,9 +104,13 @@ public class AuthRestController {
                             rolesdto.add(roledto);
                     }
             );
+            if(rolesdto.size() == 0){
+                return ResponseEntity.badRequest().body(new ResponseFailed(HttpStatus.BAD_REQUEST.value(), "Need add role for user"));
+            }
         }
 
         userDto.setRoles(rolesdto);
+        log.info("Created a new user successed");
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Created user successed", _userService.add(userDto)));
     }
 }

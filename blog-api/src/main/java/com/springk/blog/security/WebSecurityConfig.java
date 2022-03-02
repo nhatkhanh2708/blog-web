@@ -20,6 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private static final String[] SWAGGER_URL = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui/",
+            "/swagger-ui"
+    };
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
@@ -49,8 +55,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
+                    .antMatchers(SWAGGER_URL).permitAll()
                     .regexMatchers("/api/v(\\d+)/auth/(.*)").permitAll()
-                    .anyRequest().authenticated()
+                    .regexMatchers("/api/v(\\d+)/(.*)").authenticated()
+                    .anyRequest().permitAll()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()

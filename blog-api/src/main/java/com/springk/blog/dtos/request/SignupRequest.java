@@ -17,7 +17,6 @@ public class SignupRequest implements Serializable {
     private String username;
     @Size(max = 60)
     @NotBlank(message = "Input password")
-    @JsonIgnore
     private String password;
     @Size(max = 50)
     @NotBlank(message = "Don't input empty")

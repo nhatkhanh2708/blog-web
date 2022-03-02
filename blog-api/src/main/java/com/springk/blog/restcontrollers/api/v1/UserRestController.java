@@ -20,7 +20,7 @@ public class UserRestController {
     @Autowired
     private IUserService _userService;
 
-    @GetMapping(value = {"", "/"})
+    @GetMapping("")
     public ResponseEntity<?> getAll(){
         log.info("Gets all account");
         return ResponseEntity.ok(
