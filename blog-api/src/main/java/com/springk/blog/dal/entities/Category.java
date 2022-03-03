@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Entity
 @Table(name = "categories",
@@ -25,4 +26,7 @@ public class Category {
     @Size(max = 200)
     @NotBlank
     private String title;
+
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    private List<Post> posts;
 }

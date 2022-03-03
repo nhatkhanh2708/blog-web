@@ -10,10 +10,12 @@ import com.springk.blog.dtos.request.PostRequest;
 import com.springk.blog.exceptions.BadRequestException;
 import com.springk.blog.exceptions.ObjectNotFoundException;
 import com.springk.blog.services.interfaces.IPostService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class PostService implements IPostService {
 
     private Type _postDtoTypes = new TypeToken<List<PostDto>>(){}.getType();
@@ -45,6 +48,7 @@ public class PostService implements IPostService {
     public PostDto findById(long id) {
         Post post = _postRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Not found post with id = "+id));
+        log.info("Found a post with id = " + id);
         return _mapper.map(post, PostDto.class);
     }
 
@@ -55,9 +59,11 @@ public class PostService implements IPostService {
     }
 
     @Override
-    @Transactional
-    public List<PostDto> findByCategory(Set<String> categories) {
-        return null;
+    @Transactional(propagation = Propagation.MANDATORY)
+    public List<PostDto> findByCategory(String titleCategory) {
+        Category category = _categoryRespository.findByTitle(titleCategory)
+                .orElseThrow(() -> new ObjectNotFoundException("Not found category with title "+titleCategory));
+        return _mapper.map(category.getPosts(), _postDtoTypes);
     }
 
     @Override
@@ -101,5 +107,13 @@ public class PostService implements IPostService {
                 .orElseThrow(() -> new ObjectNotFoundException("Not found post with id = "+postDto.getId()));
         _mapper.map(postDto, post);
         return _mapper.map(_postRepository.save(post), PostDto.class);
+    }
+
+    @Override
+    @Transactional
+    public void delete(long id) {
+        log.info("Deleting a post with id = "+id);
+        _postRepository.deleteById(id);
+        log.info("Deleted success a post with id = "+id);
     }
 }
