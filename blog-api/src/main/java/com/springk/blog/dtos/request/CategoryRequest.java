@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryRequest {
-    @Size(max = 200)
+    @Size(max = 200, message = "Title length don't greater than 200")
     @NotBlank
     private String title;
 }

@@ -72,11 +72,11 @@ public class UserService implements IUserService {
     @Transactional
     public UserDto add(SignupRequest request) {
         if(_userRepository.findByUsername(request.getUsername()).isPresent()){
-            throw new ConflictException("User exist with this username: "+request.getUsername());
+            throw new ConflictException("User existed with this username: "+request.getUsername());
         }
 
         if(_userRepository.findByEmail(request.getEmail()).isPresent()){
-            throw new ConflictException("User exist with this email: "+request.getEmail());
+            throw new ConflictException("User existed with this email: "+request.getEmail());
         }
 
         User user = _mapper.map(request, User.class);
