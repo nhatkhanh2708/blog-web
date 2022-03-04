@@ -63,7 +63,7 @@ public class PostService implements IPostService {
     public List<PostDto> findByCategory(String titleCategory) {
         Category category = _categoryRespository.findByTitle(titleCategory)
                 .orElseThrow(() -> new ObjectNotFoundException("Not found category with title "+titleCategory));
-        return _mapper.map(category.getPosts(), _postDtoTypes);
+        return _mapper.map(_postRepository.findByCategoryId(category.getId()), _postDtoTypes);
     }
 
     @Override

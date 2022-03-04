@@ -62,6 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                     .antMatchers(SWAGGER_URL).permitAll()
+                    .regexMatchers("/api/v(\\d+)/role/(.*)").hasRole("ADMIN")
                     .regexMatchers("/api/v(\\d+)/auth/(.*)").permitAll()
                     .regexMatchers("/api/v(\\d+)/(.*)").authenticated()
                     .anyRequest().permitAll()

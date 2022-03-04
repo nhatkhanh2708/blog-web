@@ -75,10 +75,10 @@ public class PostRestController {
     public ResponseEntity<?> updatePost(
             @PathVariable long id,
             @Valid @RequestBody PostDto postDto){
-        log.info("Creating a new post");
+        log.info("Updating a new post");
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
-                "Gets post",
+                "Updated a post",
                 _postService.update(postDto)
         ));
     }
