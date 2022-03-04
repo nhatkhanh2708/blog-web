@@ -12,4 +12,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByTitleContaining(String title);
     @Query("SELECT DISTINCT p FROM Post p JOIN p.categories pc WHERE pc.id = :id")
     List<Post> findByCategoryId(Long id);
+    List<Post> findByUserId(long id);
 }

@@ -13,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.naming.AuthenticationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,21 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.toString());
         ResponseError error = new ResponseError(HttpStatus.CONFLICT.value(), ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<?> handlerForbiddenException(ForbiddenException ex, WebRequest request){
+        log.error(ex.toString());
+        ResponseError error = new ResponseError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> handlerAuthenticationException(AuthenticationException ex, WebRequest request){
+        log.error(ex.toString());
+        log.error("Authentication failed *!!!");
+        ResponseError error = new ResponseError(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

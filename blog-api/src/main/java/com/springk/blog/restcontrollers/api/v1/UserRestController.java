@@ -1,6 +1,7 @@
 package com.springk.blog.restcontrollers.api.v1;
 
 import com.springk.blog.dtos.UserDto;
+import com.springk.blog.dtos.request.UpdateUserRequest;
 import com.springk.blog.dtos.response.ResponseDto;
 import com.springk.blog.dtos.response.ResponseSimple;
 import com.springk.blog.services.interfaces.IUserService;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -59,23 +61,23 @@ public class UserRestController {
     @PutMapping("/{username}/update")
     public ResponseEntity<?> updateInfoUser(
             @PathVariable(name = "username", required = true) String username,
-            @Valid @RequestBody UserDto userDto){
+            @Valid @RequestBody UpdateUserRequest updateUserRequest){
         log.info("Update user with username = "+username);
         return ResponseEntity.ok(
                 new ResponseDto(
                         HttpStatus.OK.value(),
                         "Updated the user successed",
-                        _userService.updateInfo(userDto)
+                        _userService.updateInfo(updateUserRequest)
                 )
         );
     }
 
-    @PutMapping("/{username}/block")
+    @PutMapping("/{id}/block")
     public ResponseEntity<?> blockUser(
-            @PathVariable(name = "username", required = true) String username){
+            @PathVariable(name = "id", required = true) long id){
 
-        log.info("Block user : "+username);
-        _userService.blockUser(username);
+        log.info("Blocking user : "+id);
+        _userService.blockUser(id);
         return ResponseEntity.ok().body(new ResponseSimple(
                 HttpStatus.OK.value(),
                 "Blocked the user successed"

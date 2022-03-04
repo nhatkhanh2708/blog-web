@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -61,6 +62,18 @@ public class PostRestController {
         ));
     }
 
+    @GetMapping("/author/{id}")
+    public ResponseEntity<?> findByAuthorId(
+            @PathVariable long id){
+        log.info("Finding list posts with author id");
+        return ResponseEntity.ok(new ResponseDto(
+                HttpStatus.OK.value(),
+                "Get list posts with author id = "+id,
+                _postService.findByUserId(id)
+        ));
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("")
     public ResponseEntity<?> addNewPost(@Valid @RequestBody PostRequest postRequest){
         log.info("Creating a new post");
@@ -71,7 +84,8 @@ public class PostRestController {
         ));
     }
 
-    @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updatePost(
             @PathVariable long id,
             @Valid @RequestBody PostDto postDto){
@@ -83,8 +97,9 @@ public class PostRestController {
         ));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> updatePost(
+    public ResponseEntity<?> deletePost(
             @PathVariable long id){
         log.info("Deleting a post with id = "+id);
         _postService.delete(id);
@@ -93,4 +108,5 @@ public class PostRestController {
                 "Deleted a post successed"
         ));
     }
+
 }

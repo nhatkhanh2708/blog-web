@@ -10,6 +10,7 @@ public interface IPostService {
     PostDto findById(long id);
     List<PostDto> findByTitle(String title);
     List<PostDto> findByCategory(String titleCategory);
+    List<PostDto> findByUserId(long id);
     PostDto add(PostRequest postRequest);
     PostDto update(PostDto postDto);
     void delete(long id);

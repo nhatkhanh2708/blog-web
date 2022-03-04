@@ -6,14 +6,20 @@ import com.springk.blog.dal.repositories.RoleRepository;
 import com.springk.blog.dal.repositories.UserRepository;
 import com.springk.blog.dtos.UserDto;
 import com.springk.blog.dtos.request.SignupRequest;
+import com.springk.blog.dtos.request.UpdateUserRequest;
 import com.springk.blog.exceptions.BadRequestException;
 import com.springk.blog.exceptions.ConflictException;
+import com.springk.blog.exceptions.ForbiddenException;
 import com.springk.blog.exceptions.ObjectNotFoundException;
 import com.springk.blog.services.interfaces.IUserService;
 import com.springk.blog.utils.enums.EnumRole;
+import com.springk.blog.utils.helper.BcryptHelper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,8 +85,12 @@ public class UserService implements IUserService {
             throw new ConflictException("User existed with this email: "+request.getEmail());
         }
 
+        if(!BcryptHelper.checkPassEncodeByBcrypt(request.getPassword())){
+            throw new BadRequestException("Password must encode by bcrypt(10) !");
+        }
+
         User user = _mapper.map(request, User.class);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(request.getPassword());
         user.setActive(true);
 
         Set<Role> roles = new HashSet<>();
@@ -98,18 +108,26 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public UserDto updateInfo(UserDto userDto) {
-        User user = _userRepository.findById(userDto.getId())
-                .orElseThrow(() -> new ObjectNotFoundException("Can't update info user due to not found " +userDto.getUsername()));
-        _mapper.map(userDto, user);
+    public UserDto updateInfo(UpdateUserRequest updateUserRequest) {
+        User user = _userRepository.findById(updateUserRequest.getId())
+                .orElseThrow(() -> new ObjectNotFoundException("Not found username with id: " +updateUserRequest.getId()));
+
+        String nameAuth = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        //Can't update the user without user own
+        if(nameAuth != user.getUsername())
+            throw new ForbiddenException("You are not permission to access this user !");
+
+        _mapper.map(updateUserRequest, user);
         return _mapper.map(_userRepository.save(user), UserDto.class);
     }
 
+    @Deprecated
     @Override
     @Transactional
     public UserDto updateRole(String username, Set<String> roles) {
         User user = _userRepository.findByUsername(username)
-                .orElseThrow(() -> new ObjectNotFoundException("Can't update roles user due to not found " + username));
+                .orElseThrow(() -> new ObjectNotFoundException("Not found username: " + username));
 
         Set<Role> rolesSet = new HashSet<>();
 
@@ -126,9 +144,15 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public void blockUser(String username) {
-        User user = _userRepository.findByUsername(username)
-                .orElseThrow(() -> new ObjectNotFoundException("Can't block this user: " + username));
+    public void blockUser(long id) {
+        User user = _userRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Not found userid: " + id));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth.getName() != user.getUsername()
+            || !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")))
+            throw new ForbiddenException("You are not permission to access this user !");
+
         user.setActive(false);
         _userRepository.save(user);
     }
