@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -40,6 +41,7 @@ public class CategoryRestController {
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a category successed", category)) ;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<?> addNewCategory(@Valid @RequestBody CategoryRequest categoryRequest){
         log.info("Creating a category with title: "+categoryRequest.getTitle());
@@ -47,6 +49,7 @@ public class CategoryRestController {
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Created a category successed", category)) ;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{title}")
     public ResponseEntity<?> updateCategory(
             @PathVariable String title,
