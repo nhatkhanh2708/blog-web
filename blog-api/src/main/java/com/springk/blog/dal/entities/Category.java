@@ -26,7 +26,4 @@ public class Category {
     @Size(max = 200)
     @NotBlank
     private String title;
-
-    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
-    private List<Post> posts;
 }
