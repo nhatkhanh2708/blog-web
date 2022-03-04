@@ -83,7 +83,7 @@ public class PostRestController {
         ));
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> updatePost(
             @PathVariable long id){
         log.info("Deleting a post with id = "+id);

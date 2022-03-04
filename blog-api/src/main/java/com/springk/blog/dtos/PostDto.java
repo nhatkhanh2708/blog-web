@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class PostDto implements Serializable {
+public class PostDto extends AuditorAwareDto<String> implements Serializable {
     private Long id;
     @Size(max = 150)
     @NotBlank

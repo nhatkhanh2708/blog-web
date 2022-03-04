@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
-public class CategoryDto implements Serializable {
+public class CategoryDto extends AuditorAwareDto<String> implements Serializable {
     private Long id;
     @Size(max = 200)
     @NotBlank

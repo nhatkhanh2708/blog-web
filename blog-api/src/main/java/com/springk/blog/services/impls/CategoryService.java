@@ -56,7 +56,7 @@ public class CategoryService implements ICategoryService {
             throw new ConflictException("Category existed with title "+categoryRequest.getTitle());
         }
         Category category = _mapper.map(categoryRequest, Category.class);
-        return _mapper.map(category, CategoryDto.class);
+        return _mapper.map(_categoryRepository.save(category), CategoryDto.class);
     }
 
     @Override
