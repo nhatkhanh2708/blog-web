@@ -85,12 +85,12 @@ public class UserService implements IUserService {
             throw new ConflictException("User existed with this email: "+request.getEmail());
         }
 
-        if(!BcryptHelper.checkPassEncodeByBcrypt(request.getPassword())){
-            throw new BadRequestException("Password must encode by bcrypt(10) !");
-        }
+//        if(!BcryptHelper.checkPassEncodeByBcrypt(request.getPassword())){
+//            throw new BadRequestException("Password must encode by bcrypt(10) !");
+//        }
 
         User user = _mapper.map(request, User.class);
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setActive(true);
 
         Set<Role> roles = new HashSet<>();
@@ -112,11 +112,11 @@ public class UserService implements IUserService {
         User user = _userRepository.findById(updateUserRequest.getId())
                 .orElseThrow(() -> new ObjectNotFoundException("Not found username with id: " +updateUserRequest.getId()));
 
-        String nameAuth = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         //Can't update the user without user own
-        if(nameAuth != user.getUsername())
-            throw new ForbiddenException("You are not permission to access this user !");
+        if(!auth.getName().equals(user.getUsername()))
+            throw new ForbiddenException("You have not permission to access !");
 
         _mapper.map(updateUserRequest, user);
         return _mapper.map(_userRepository.save(user), UserDto.class);
@@ -149,9 +149,9 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new ObjectNotFoundException("Not found userid: " + id));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if(auth.getName() != user.getUsername()
+        if(!auth.getName().equals(user.getUsername())
             || !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")))
-            throw new ForbiddenException("You are not permission to access this user !");
+            throw new ForbiddenException("You have not permission to access !");
 
         user.setActive(false);
         _userRepository.save(user);

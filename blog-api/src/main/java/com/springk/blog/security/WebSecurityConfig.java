@@ -45,8 +45,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     @Bean
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Override
@@ -56,6 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.exceptionHandling().authenticationEntryPoint(new AuthEntryPointJwt());
         http
                 .cors()
                 .and()
@@ -66,8 +67,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .regexMatchers("/api/v(\\d+)/auth/(.*)").permitAll()
                     .regexMatchers("/api/v(\\d+)/(.*)").authenticated()
                     .anyRequest().permitAll()
-                .and()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

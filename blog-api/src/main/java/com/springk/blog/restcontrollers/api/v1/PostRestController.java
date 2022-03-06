@@ -2,6 +2,7 @@ package com.springk.blog.restcontrollers.api.v1;
 
 import com.springk.blog.dtos.PostDto;
 import com.springk.blog.dtos.request.PostRequest;
+import com.springk.blog.dtos.request.UpdatePostRequest;
 import com.springk.blog.dtos.response.ResponseDto;
 import com.springk.blog.dtos.response.ResponseSimple;
 import com.springk.blog.services.interfaces.IPostService;
@@ -9,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,10 +23,10 @@ public class PostRestController {
 
     @GetMapping("")
     public ResponseEntity<?> getsAll(){
-        log.info("Gets all post");
+        log.info("Get all post");
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
-                "Gets all post",
+                "Get all post",
                 _postService.findAll()
         ));
     }
@@ -36,17 +36,17 @@ public class PostRestController {
         log.info("Get a post with id = "+id);
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
-                "Get a post",
+                "Gets a post",
                 _postService.findById(id)
         ));
     }
 
     @GetMapping("/param")
     public ResponseEntity<?> getsByTitle(@RequestParam String title){
-        log.info("Gets post with title = "+title);
+        log.info("Get list post with title = "+title);
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
-                "Gets post",
+                "Get list post by title",
                 _postService.findByTitle(title)
         ));
     }
@@ -64,7 +64,7 @@ public class PostRestController {
 
     @GetMapping("/author/{id}")
     public ResponseEntity<?> findByAuthorId(
-            @PathVariable long id){
+            @PathVariable(name = "id") long id){
         log.info("Finding list posts with author id");
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
@@ -73,34 +73,30 @@ public class PostRestController {
         ));
     }
 
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("")
     public ResponseEntity<?> addNewPost(@Valid @RequestBody PostRequest postRequest){
         log.info("Creating a new post");
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
-                "Gets post",
+                "Created a new post",
                 _postService.add(postRequest)
         ));
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/update/{id}")
+    @PutMapping("/update")
     public ResponseEntity<?> updatePost(
-            @PathVariable long id,
-            @Valid @RequestBody PostDto postDto){
+            @Valid @RequestBody UpdatePostRequest updatePostRequest){
         log.info("Updating a new post");
         return ResponseEntity.ok(new ResponseDto(
                 HttpStatus.OK.value(),
                 "Updated a post",
-                _postService.update(postDto)
+                _postService.update(updatePostRequest)
         ));
     }
 
-    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deletePost(
-            @PathVariable long id){
+            @PathVariable(name = "id") long id){
         log.info("Deleting a post with id = "+id);
         _postService.delete(id);
         return ResponseEntity.ok(new ResponseSimple(

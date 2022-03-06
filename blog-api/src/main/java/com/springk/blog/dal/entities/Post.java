@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,8 +26,7 @@ public class Post extends Auditable<String>{
     @NotBlank
     private String title;
 
-    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
-    @NotBlank
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "slug", nullable = true)

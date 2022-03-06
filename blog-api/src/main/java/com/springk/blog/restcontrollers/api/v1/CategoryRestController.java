@@ -23,19 +23,19 @@ public class CategoryRestController {
 
     @GetMapping("")
     public ResponseEntity<?> getsAll(){
-        log.info("Gets all category");
+        log.info("Get all category");
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Gets all category successed", _categoryService.findAll()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable long id){
+    public ResponseEntity<?> getById(@PathVariable(name = "id") long id){
         log.info("Get a category with id = "+id);
         CategoryDto category = _categoryService.findById(id);
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a category successed", category)) ;
     }
 
-    @GetMapping("/{title}")
-    public ResponseEntity<?> getByTitle(@PathVariable String title){
+    @GetMapping("/param")
+    public ResponseEntity<?> getByTitle(@RequestParam(value = "title", required = true) String title){
         log.info("Get a category with title = "+title);
         CategoryDto category = _categoryService.findByTitle(title);
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "Get a category successed", category)) ;
@@ -50,9 +50,9 @@ public class CategoryRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{title}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateCategory(
-            @PathVariable String title,
+            @PathVariable long id,
             @Valid @RequestBody CategoryDto categoryDto){
         log.info("Updating a category with id = "+categoryDto.getId());
         CategoryDto category = _categoryService.update(categoryDto);
