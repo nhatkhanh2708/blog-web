@@ -20,7 +20,7 @@ public class SignupRequest {
     @NotBlank(message = "Input password")
     private String password;
     @Size(max = 50)
-    @NotBlank(message = "Don't input empty")
+    @NotBlank(message = "Not empty")
     @Email(message = "Email isn't valid")
     private String email;
     private Set<String> roles;

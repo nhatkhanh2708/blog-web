@@ -7,6 +7,7 @@ import com.springk.blog.dal.repositories.PostRepository;
 import com.springk.blog.dal.repositories.UserRepository;
 import com.springk.blog.dtos.PostDto;
 import com.springk.blog.dtos.request.PostRequest;
+import com.springk.blog.dtos.request.UpdatePostRequest;
 import com.springk.blog.exceptions.BadRequestException;
 import com.springk.blog.exceptions.ForbiddenException;
 import com.springk.blog.exceptions.ObjectNotFoundException;
@@ -61,7 +62,7 @@ public class PostService implements IPostService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public List<PostDto> findByCategory(String titleCategory) {
         Category category = _categoryRespository.findByTitle(titleCategory)
                 .orElseThrow(() -> new ObjectNotFoundException("Not found category with title "+titleCategory));
@@ -79,7 +80,7 @@ public class PostService implements IPostService {
     public PostDto add(PostRequest postRequest) {
         Post post = new Post();
         post.setTitle(postRequest.getTitle());
-        post.setContent(post.getContent());
+        post.setContent(postRequest.getContent());
         post.setUser(_userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName())
                 .orElseThrow(() -> new BadRequestException("Username isn't exist !")));
 
@@ -110,16 +111,40 @@ public class PostService implements IPostService {
 
     @Override
     @Transactional
-    public PostDto update(PostDto postDto) {
+    public PostDto update(UpdatePostRequest updatePostRequest) {
         String nameAuth = SecurityContextHolder.getContext().getAuthentication().getName();
-        Post post = _postRepository.findById(postDto.getId())
-                .orElseThrow(() -> new ObjectNotFoundException("Not found post with id = " + postDto.getId()));
+        Post post = _postRepository.findById(updatePostRequest.getId())
+                .orElseThrow(() -> new ObjectNotFoundException("Not found post with id = " + updatePostRequest.getId()));
 
         //Can't update the post without created by own
-        if(nameAuth != postDto.getUser().getUsername() || nameAuth != post.getUser().getUsername())
+        if(!nameAuth.equals(post.getUser().getUsername()))
             throw new ForbiddenException("You are not permission to access this post !");
 
-        _mapper.map(postDto, post);
+        if(!updatePostRequest.getTitle().equals(post.getTitle())){
+            String title = updatePostRequest.getTitle().replaceAll(" ", "");
+            StringBuilder slug = new StringBuilder();
+            slug.append("/");
+            slug.append(post.getUser().getUsername());
+            slug.append("/");
+            slug.append(post.getId());
+            slug.append("/");
+            slug.append(title);
+            post.setSlug(slug.toString());
+        }
+
+        post.setTitle(updatePostRequest.getTitle());
+        post.setContent(updatePostRequest.getContent());
+
+        Set<Category> categories = new HashSet<>();
+        updatePostRequest.getCategories().forEach(category -> {
+            categories.add(_categoryRespository.findByTitle(category)
+                    .orElseThrow(() -> new BadRequestException("Category isn't exist !")));
+        });
+
+        if(categories.size() == 0)
+            throw new BadRequestException("Category isn't exist !");
+        post.setCategories(categories);
+
         return _mapper.map(_postRepository.save(post), PostDto.class);
     }
 
@@ -131,7 +156,7 @@ public class PostService implements IPostService {
                 .orElseThrow(() -> new ObjectNotFoundException("Not found post with id = " + id));
 
         //Can't delete the post without created by own
-        if(nameAuth != post.getUser().getUsername())
+        if(!nameAuth.equals(post.getUser().getUsername()))
             throw new ForbiddenException("You are not permission to access this post !");
 
         log.info("Deleting a post with id = "+id);

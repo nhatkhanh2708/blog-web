@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Data
-public class UserDto extends AuditorAwareDto<String> implements Serializable {
+public class UserDto implements Serializable {
     private Long id;
     @Size(max = 70)
     @NotBlank

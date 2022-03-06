@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,21 +41,26 @@ public class AuthRestController {
     @PostMapping("/login")
     public ResponseEntity<?> getLogin(@Valid @RequestBody LoginRequest login) {
         log.info("User login with username = " + login.getUsername());
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        try {
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        String jwt = jwtUtils.generateToken(userDetails);
+            String jwt = jwtUtils.generateToken(userDetails);
 
-        log.info("Generated jwt for user successed");
-        return ResponseEntity.ok(new ResponseJwt(
-                jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-                        .collect(Collectors.toList())));
+            log.info("Generated jwt for user successed");
+            return ResponseEntity.ok(new ResponseJwt(
+                    jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(),
+                    userDetails.getEmail(),
+                    userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+                            .collect(Collectors.toList())));
+        }
+        catch (BadCredentialsException ex){
+            throw new BadCredentialsException("Incorrect username or password");
+        }
     }
 
     @PostMapping("/signup")

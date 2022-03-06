@@ -24,7 +24,7 @@ public class UserRestController {
 
     @GetMapping("")
     public ResponseEntity<?> getsAll(){
-        log.info("Gets all account");
+        log.info("Get all account");
         return ResponseEntity.ok(
                 new ResponseDto(
                         HttpStatus.OK.value(),
@@ -58,11 +58,10 @@ public class UserRestController {
                         _userService.findByUsername(username)));
     }
 
-    @PutMapping("/{username}/update")
+    @PutMapping("/update")
     public ResponseEntity<?> updateInfoUser(
-            @PathVariable(name = "username", required = true) String username,
             @Valid @RequestBody UpdateUserRequest updateUserRequest){
-        log.info("Update user with username = "+username);
+        log.info("Update user with username = "+updateUserRequest.getId());
         return ResponseEntity.ok(
                 new ResponseDto(
                         HttpStatus.OK.value(),

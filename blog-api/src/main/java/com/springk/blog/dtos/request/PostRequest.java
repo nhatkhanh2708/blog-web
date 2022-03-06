@@ -5,9 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -17,8 +16,8 @@ public class PostRequest {
     @Size(max = 150)
     @NotBlank
     private String title;
-    @NotBlank
+    @Size(max = 1300)
     private String content;
-    @NotEmpty
-    private Set<String> categories = new HashSet<>();
+    @NotNull
+    private Set<String> categories;
 }

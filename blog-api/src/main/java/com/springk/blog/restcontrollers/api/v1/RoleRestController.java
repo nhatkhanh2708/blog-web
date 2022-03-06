@@ -30,7 +30,7 @@ public class RoleRestController {
 
     @GetMapping(value = {""})
     public ResponseEntity<?> getsAll(){
-        log.info("Gets all role");
+        log.info("Get all role");
         return ResponseEntity.ok(
                 new ResponseDto(
                         HttpStatus.OK.value(),

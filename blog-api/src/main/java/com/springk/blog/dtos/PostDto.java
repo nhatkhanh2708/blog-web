@@ -16,7 +16,7 @@ public class PostDto extends AuditorAwareDto<String> implements Serializable {
     @Size(max = 150)
     @NotBlank
     private String title;
-    @NotBlank
+    @Size(max = 1300)
     private String content;
     @Size(max = 200)
     private String slug;
